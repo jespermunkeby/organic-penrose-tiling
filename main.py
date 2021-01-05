@@ -1,6 +1,8 @@
 import numpy as np
 from random import random
 from copy import deepcopy
+import matplotlib.pyplot as plt
+from lloyd import Field
 
 class Node:
     def __init__(self, x, y):
@@ -111,14 +113,14 @@ class Grid:
         return s
 
 class Orientation:
-    def __init__(self, rotation = 0, translatement = [0,0]):
+    def __init__(self, rotation = 0, translate = [0,0]):
         self.rotation = rotation
-        self.translatement = translatement
+        self.translate = translate
     
     def iter_oriented(self, identity):
         orientation = deepcopy(identity)
         orientation.rotate(self.rotation)
-        orientation.translate(self.translatement)
+        orientation.translate(self.translate)
 
         for node in orientation:
             yield node
@@ -133,7 +135,7 @@ class EdgeIdentity: #Line along with its orientations
         """
             Iterates through oriented copies of identity.
             Multipresent nodes are returned in a list, in which all
-            nodes are in some sense equivalent
+            nodes are equivalent
         """
         l = []
         for ori in self.orientations:
@@ -144,28 +146,96 @@ class EdgeIdentity: #Line along with its orientations
             
         for nodes in zip(*l):
             yield nodes
-    
+        
 
 class OrganicPenrose:
     def __init__(self):
-        self.kite = []
+        e1 = LinkedLine()
+        e1.add(1,0)
+        e1.add(0,0)
+
+        phi = (1 + 5 ** 0.5) / 2
+
+        e2 = LinkedLine()
+        e2.add(1/phi,0)
+        e2.add(0,0)
+
+        e3 = LinkedLine()
+        e3.add(1/phi,0)
+        e3.add(0,0)
+
+        self.edges = [e1,e2,e3]
+
+        #Kite
+        kite_e1_ors = [
+            Orientation(rotation=np.deg2rad(180-36),translate=[1,0]),
+            Orientation(rotation=np.deg2rad(180+36),translate=[1,0])
+            ]
+
+        kite_e2_ors = [
+            Orientation(rotation=np.deg2rad(72) ),
+            ]
+
+        kite_e3_ors = [
+            Orientation(rotation=np.deg2rad(-72) ),
+            ]
         
-    
-    def get_dart_forces(self, l1, l2, l3):
-        #1. Copy l1, l2, l3 into edges edges
-        pass
-    
-    def get_kite_forces(self, l1, l2, l3):
-        pass
-    
-    def grow(self,prob):
-        pass
-    
-    def subdivide(self,max_dist):
-        pass
+        self.kite = [
+            EdgeIdentity(e1, kite_e1_ors),
+            EdgeIdentity(e2, kite_e2_ors),
+            EdgeIdentity(e3, kite_e3_ors)
+            ]
 
-    def differentiate(self):
-        pass
+        #Probably right
+        pos1 = [np.cos(np.deg2rad(72)), np.sin(np.deg2rad(36))]
+        pos2 = [np.cos(np.deg2rad(72)), -np.sin(np.deg2rad(36))]
 
-    def update(self):
-        pass
+        dart_e1_ors = [
+            Orientation(rotation=np.deg2rad(180+36),translate=pos1),
+            Orientation(rotation=np.deg2rad(180-36),translate=pos2)
+            ]
+
+        dart_e2_ors = [
+            Orientation(rotation=np.deg2rad(180+72),translate=pos1),
+            ]
+
+        dart_e3_ors = [
+            Orientation(rotation=np.deg2rad(180-72),translate=pos2),
+            ]
+        
+        self.dart = [
+            EdgeIdentity(e1, dart_e1_ors),
+            EdgeIdentity(e2, dart_e2_ors),
+            EdgeIdentity(e3, dart_e3_ors)
+            ]
+    
+    def view(self):
+        for eid in self.kite:
+            coors = [[] for _ in range(len(eid.orientations))]
+            for nodes in eid:
+                for i,n in enumerate(nodes):
+                    coors[i].append(n.pos.tolist())
+            for coo_list in coors:
+                xs = []
+                ys = []
+                for coo in coo_list:
+                    xs.append(coo[0])
+                    ys.append(coo[1])
+                plt.plot(xs,ys)
+                plt.scatter(xs,ys)
+        plt.show()
+
+        for eid in self.dart:
+            coors = [[] for _ in range(len(eid.orientations))]
+            for nodes in eid:
+                for i,n in enumerate(nodes):
+                    coors[i].append(n.pos.tolist())
+            for coo_list in coors:
+                xs = []
+                ys = []
+                for coo in coo_list:
+                    xs.append(coo[0])
+                    ys.append(coo[1])
+                plt.plot(xs,ys)
+                plt.scatter(xs,ys)
+        plt.show()

@@ -1,5 +1,5 @@
 import unittest
-from main import Node, LinkedLine, Grid, Orientation, EdgeIdentity
+from main import Node, LinkedLine, Grid, Orientation, EdgeIdentity, OrganicPenrose
 import numpy as np
 from copy import deepcopy
 
@@ -129,11 +129,9 @@ class TestEdgeIdentity(unittest.TestCase):
 
             #...
 
-
-
-            
-
-
+class TestOrganicPenrose(unittest.TestCase):
+    def test_relax(self):
+        pass
     
 
 if __name__ == '__main__':
